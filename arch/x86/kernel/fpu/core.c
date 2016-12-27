@@ -166,8 +166,15 @@ void __kernel_fpu_end(void)
 }
 EXPORT_SYMBOL(__kernel_fpu_end);
 
+/*
+ * We don't know in which context the two functions at the below will be called,
+ * but we know preciseely that softirq uses FPU, so we have to disable softirq
+ * as well as task preemption.
+ */
+
 void kernel_fpu_begin(void)
 {
+	local_bh_disable();
 	preempt_disable();
 	__kernel_fpu_begin();
 }
@@ -177,6 +184,7 @@ void kernel_fpu_end(void)
 {
 	__kernel_fpu_end();
 	preempt_enable();
+	local_bh_enable();
 }
 EXPORT_SYMBOL_GPL(kernel_fpu_end);
 
