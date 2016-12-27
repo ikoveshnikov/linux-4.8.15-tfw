@@ -251,7 +251,9 @@ asmlinkage __visible void __softirq_entry __do_softirq(void)
 	__local_bh_disable_ip(_RET_IP_, SOFTIRQ_OFFSET);
 	in_hardirq = lockdep_softirq_start();
 
-	kernel_fpu_begin();
+#ifdef CONFIG_SECURITY_TEMPESTA
+	__kernel_fpu_begin_bh();
+#endif
 
 restart:
 	/* Reset the pending bitmask before enabling irqs */
@@ -297,7 +299,9 @@ restart:
 		wakeup_softirqd();
 	}
 
-	kernel_fpu_end();
+#ifdef CONFIG_SECURITY_TEMPESTA
+	__kernel_fpu_end_bh();
+#endif
 	lockdep_softirq_end(in_hardirq);
 	account_irq_exit_time(current);
 	__local_bh_enable(SOFTIRQ_OFFSET);

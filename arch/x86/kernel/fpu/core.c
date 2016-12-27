@@ -109,7 +109,8 @@ bool irq_fpu_usable(void)
 }
 EXPORT_SYMBOL(irq_fpu_usable);
 
-void __kernel_fpu_begin(void)
+void
+__kernel_fpu_begin_bh(void)
 {
 	struct fpu *fpu = &current->thread.fpu;
 
@@ -128,9 +129,10 @@ void __kernel_fpu_begin(void)
 		__fpregs_activate_hw();
 	}
 }
-EXPORT_SYMBOL(__kernel_fpu_begin);
+EXPORT_SYMBOL(__kernel_fpu_begin_bh);
 
-void __kernel_fpu_end(void)
+void
+__kernel_fpu_end_bh(void)
 {
 	struct fpu *fpu = &current->thread.fpu;
 
@@ -140,6 +142,27 @@ void __kernel_fpu_end(void)
 		__fpregs_deactivate_hw();
 
 	kernel_fpu_enable();
+}
+EXPORT_SYMBOL(__kernel_fpu_end_bh);
+
+
+void __kernel_fpu_begin(void)
+{
+#ifdef CONFIG_SECURITY_TEMPESTA
+	if (in_softirq())
+		return;
+#endif
+	__kernel_fpu_begin_bh();
+}
+EXPORT_SYMBOL(__kernel_fpu_begin);
+
+void __kernel_fpu_end(void)
+{
+#ifdef CONFIG_SECURITY_TEMPESTA
+	if (in_softirq())
+		return;
+#endif
+	__kernel_fpu_end_bh();
 }
 EXPORT_SYMBOL(__kernel_fpu_end);
 
