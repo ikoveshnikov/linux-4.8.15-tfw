@@ -157,8 +157,7 @@ int tcp_v4_connect(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 		return -EAFNOSUPPORT;
 
 	nexthop = daddr = usin->sin_addr.s_addr;
-	inet_opt = rcu_dereference_protected(inet->inet_opt,
-					     lockdep_sock_is_held(sk));
+	inet_opt = rcu_dereference_raw(inet->inet_opt);
 	if (inet_opt && inet_opt->opt.srr) {
 		if (!daddr)
 			return -EINVAL;

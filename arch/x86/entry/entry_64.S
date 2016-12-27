@@ -824,11 +824,7 @@ ENTRY(do_softirq_own_stack)
 	incl	PER_CPU_VAR(irq_count)
 	cmove	PER_CPU_VAR(irq_stack_ptr), %rsp
 	push	%rbp				/* frame pointer backlink */
-#ifdef CONFIG_SECURITY_TEMPESTA
-	call __tempesta_do_softirq_fpusafe
-#else
 	call	__do_softirq
-#endif
 	leaveq
 	decl	PER_CPU_VAR(irq_count)
 	ret

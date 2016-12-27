@@ -26,6 +26,7 @@
 #include <linux/smpboot.h>
 #include <linux/tick.h>
 #include <linux/irq.h>
+#include <asm/fpu/api.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/irq.h>
@@ -250,6 +251,8 @@ asmlinkage __visible void __softirq_entry __do_softirq(void)
 	__local_bh_disable_ip(_RET_IP_, SOFTIRQ_OFFSET);
 	in_hardirq = lockdep_softirq_start();
 
+	kernel_fpu_begin();
+
 restart:
 	/* Reset the pending bitmask before enabling irqs */
 	set_softirq_pending(0);
@@ -294,6 +297,7 @@ restart:
 		wakeup_softirqd();
 	}
 
+	kernel_fpu_end();
 	lockdep_softirq_end(in_hardirq);
 	account_irq_exit_time(current);
 	__local_bh_enable(SOFTIRQ_OFFSET);

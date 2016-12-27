@@ -1675,8 +1675,7 @@ static inline void sk_rethink_txhash(struct sock *sk)
 static inline struct dst_entry *
 __sk_dst_get(struct sock *sk)
 {
-	return rcu_dereference_check(sk->sk_dst_cache,
-				     lockdep_sock_is_held(sk));
+	return rcu_dereference_raw(sk->sk_dst_cache);
 }
 
 static inline struct dst_entry *
