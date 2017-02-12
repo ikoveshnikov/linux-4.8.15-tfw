@@ -800,10 +800,12 @@ struct sock *inet_csk_reqsk_queue_add(struct sock *sk,
 		inet_child_forget(sk, req, child);
 		child = NULL;
 	}
+#ifdef CONFIG_SECURITY_TEMPESTA
 	else if (sock_flag(sk, SOCK_TEMPESTA)) {
 		/* Tempesta doesn't use accept queue, just put the request. */
 		reqsk_put(req);
 	}
+#endif
 	else {
 		req->sk = child;
 		req->dl_next = NULL;
