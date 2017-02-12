@@ -799,7 +799,12 @@ struct sock *inet_csk_reqsk_queue_add(struct sock *sk,
 	if (unlikely(sk->sk_state != TCP_LISTEN)) {
 		inet_child_forget(sk, req, child);
 		child = NULL;
-	} else {
+	}
+	else if (sock_flag(sk, SOCK_TEMPESTA)) {
+		/* Tempesta doesn't use accept queue, just put the request. */
+		reqsk_put(req);
+	}
+	else {
 		req->sk = child;
 		req->dl_next = NULL;
 		if (queue->rskq_accept_head == NULL)
