@@ -976,6 +976,17 @@ static inline void _kfree_skb_defer(struct sk_buff *skb)
 	/* drop skb->head and call any destructors for packet */
 	skb_release_all(skb);
 
+	/*
+	 * Tempesta uses its own fast page allocator for socket buffers,
+	 * so no need to use napi_alloc_cache for paged skbs.
+	 */
+#ifdef CONFIG_SECURITY_TEMPESTA
+	if (skb->skb_page) {
+		put_page(virt_to_head_page(skb));
+		return;
+	}
+#endif
+
 	/* record skb to CPU local list */
 	nc->skb_cache[nc->skb_count++] = skb;
 
